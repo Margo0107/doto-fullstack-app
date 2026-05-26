@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { useTask } from "./hooks/useTask";
 
 type Task = {
   id: number;
@@ -10,18 +12,33 @@ function App() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const addTask = () => {
+  const { getTask, createTask, deleteTask: removeTask } = useTask();
+
+  // Load tasks when app starts
+  useEffect(() => {
+    const loadTasks = async () => {
+      const data = await getTask();
+
+      if (data) {
+        setTasks(data);
+      }
+    };
+    loadTasks();
+  }, []);
+
+  const addTask = async () => {
     if (!text.trim()) return;
 
-    const newTask: Task = {
-      id: Date.now(),
-      text,
-    };
-    setTasks((prev) => [...prev, newTask]);
+    const newTask = await createTask({ text });
+
+    if (newTask) {
+      setTasks((prev) => [...prev, newTask]);
+    }
     setText("");
   };
 
-  const deleteTask = (id: number) => {
+  const deleteTask = async (id: number) => {
+    await removeTask(id);
     setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
@@ -48,11 +65,11 @@ function App() {
             </button>
           </div>
 
-          <div>
+          <div className="flex flex-col gap-4">
             {tasks.map((task) => (
               <ul
                 key={task.id}
-                className="flex gap-4 bg-zinc-700 p-4 py-2 rounded-lg justify-between items-center"
+                className="flex bg-zinc-700 p-4 py-2 rounded-lg justify-between items-center"
               >
                 <li className="text-lg">{task.text}</li>
                 <button
