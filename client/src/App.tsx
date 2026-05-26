@@ -1,23 +1,69 @@
+import { useState } from "react";
+
+type Task = {
+  id: number;
+  text: string;
+};
+
 function App() {
+  const [text, setText] = useState("");
+
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const addTask = () => {
+    if (!text.trim()) return;
+
+    const newTask: Task = {
+      id: Date.now(),
+      text,
+    };
+    setTasks((prev) => [...prev, newTask]);
+    setText("");
+  };
+
+  const deleteTask = (id: number) => {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+  };
+
   return (
     <>
-      <div className="flex h-screen flex-col items-center justify-center bg-zinc-900 text-white text-3xl">
+      <div className="flex h-screen flex-col items-center justify-center bg-zinc-900 text-white">
         <section className="flex flex-col gap-11 justify-between bg-zinc-800 rounded-xl p-7 py-6">
           <h1 className="text-4xl">Todo App</h1>
-          <div>
+          <div className="flex gap-3">
             <input
               type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              aria-label="input task"
               placeholder="describe the task"
-              className="bg-zinc-700 rounded-lg p-4 py-2 focus:outline-blue-600 outline-none"
+              className="rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 text-xl outline-none transition focus:border-blue-500"
             />
-            <button className="bg-blue-500 rounded-lg p-4 py-2">add</button>
+            <button
+              onClick={addTask}
+              aria-label="add task"
+              className="bg-blue-500 text-xl rounded-lg p-4 py-2 transition hover:bg-blue-500 active:scale-95"
+            >
+              add
+            </button>
           </div>
 
           <div>
-            <ul className="flex gap-4 bg-zinc-700 p-4 py-2 rounded-lg">
-              <li>Js & React</li>
-              <button className="bg-red-500 tetx-lg rounded-lg p-2 py-1">delete</button>
-            </ul>
+            {tasks.map((task) => (
+              <ul
+                key={task.id}
+                className="flex gap-4 bg-zinc-700 p-4 py-2 rounded-lg justify-between items-center"
+              >
+                <li className="text-lg">{task.text}</li>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  aria-label="delete task"
+                  className="rounded-lg bg-red-500 px-3 py-2 text-sm font-medium transition hover:bg-red-400"
+                >
+                  delete
+                </button>
+              </ul>
+            ))}
           </div>
         </section>
       </div>
